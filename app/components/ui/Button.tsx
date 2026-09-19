@@ -6,8 +6,8 @@ type ButtonProps = {
   size?: "sm" | "md" | "lg";
   href?: string;
   children: React.ReactNode;
-  type: "submit" | "button" | "reset";
-  onClick: () => void;
+  type?: "button" | "submit" | "reset";
+  onClick?: () => void;
 };
 
 export default function Button({
@@ -16,7 +16,7 @@ export default function Button({
   href,
   type = "button",
   children,
-  onClick
+  onClick,
 }: ButtonProps) {
   const baseStyle =
     "font-medium transition-colors cursor-pointer disabled:opacity-50 disabled:pointer-events-none";
@@ -42,16 +42,21 @@ export default function Button({
 
   if (href) {
     return (
-      <Link href={href} className={` ${baseStyle} ${variants[variant]} ${sizes[size]}  `}>
-        {" "}
+      <Link
+        href={href}
+        className={` ${baseStyle} ${variants[variant]} ${sizes[size]}  `}
+      >
         {children}
       </Link>
     );
-  } else {
-    return (
-      <button type={type} onClick={onClick} className={` ${baseStyle} ${variants[variant]} ${sizes[size]}  `}>
-        {children}{" "}
-      </button>
-    );
   }
+  return (
+    <button
+      type={type}
+      onClick={onClick}
+      className={` ${baseStyle} ${variants[variant]} ${sizes[size]}  `}
+    >
+      {children}
+    </button>
+  );
 }
