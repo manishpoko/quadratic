@@ -8,9 +8,9 @@ export default function FeaturesPage() {
           </p>
 
           <h1 className="mt-4 text-4xl font-bold tracking-[-0.03em] text-white sm:text-5xl md:text-6xl">
-            everything you need.
+            think Linear,
             <span className="block text-purple-400">
-              nothing you don't.
+              but minimal.
             </span>
           </h1>
 
