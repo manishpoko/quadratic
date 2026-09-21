@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 type PricingCardProps = {
   name: string;
   price: string;
@@ -12,9 +14,7 @@ export default function PricingCard({
   return (
     <article className="flex min-h-[520px] flex-col rounded-2xl border border-white/10 bg-white/[0.03] p-8">
       {/* Plan name */}
-      <h2 className="text-lg font-semibold tracking-wide text-white">
-        {name}
-      </h2>
+      <h2 className="text-lg font-semibold tracking-wide text-white">{name}</h2>
 
       {/* Price */}
       <div className="mt-6 flex items-baseline gap-2">
@@ -29,11 +29,9 @@ export default function PricingCard({
 
       {/* Short description */}
       <p className="mt-4 text-sm leading-6 text-zinc-400">
-        {name === "FREE" &&
-          "Everything you need to start tracking your work."}
+        {name === "FREE" && "Everything you need to start tracking your work."}
 
-        {name === "PRO" &&
-          "More power and flexibility for growing teams."}
+        {name === "PRO" && "More power and flexibility for growing teams."}
 
         {name === "ENTERPRISE" &&
           "Advanced features and support for larger teams."}
@@ -56,10 +54,24 @@ export default function PricingCard({
       </ul>
 
       {/* Button */}
+
       <div className="mt-auto pt-8">
-        <button className="w-full rounded-lg border border-white/10 bg-white/[0.03] px-4 py-3 text-sm font-medium text-white transition-colors hover:border-purple-500/40 hover:bg-purple-500/10">
-          {price === "COMING SOON" ? "Coming Soon" : "Get Started"}
-        </button>
+        {price === "COMING SOON" ? (
+          <button
+            type="button"
+            disabled
+            className="block w-full rounded-lg border border-white/10 bg-white/[0.03] px-4 py-3 text-center text-sm font-medium text-white transition-colors hover:border-purple-500/40 hover:bg-purple-500/10"
+          >
+            Coming Soon
+          </button>
+        ) : (
+          <Link
+            href="/signup"
+            className="block w-full rounded-lg border border-white/10 bg-white/[0.03] px-4 py-3 text-center text-sm font-medium text-white transition-colors hover:border-purple-500/40 hover:bg-purple-500/10"
+          >
+            Get Started
+          </Link>
+        )}
       </div>
     </article>
   );
