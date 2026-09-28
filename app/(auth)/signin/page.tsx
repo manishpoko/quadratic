@@ -76,7 +76,7 @@ export default function SigninPage() {
         </form>
 
         <p className="mt-8 text-center text-sm text-zinc-500">
-          Don't have an account?{" "}
+          Do not have an account?{" "}
           <Link
             href="/signup"
             className="font-medium text-purple-400 transition-colors hover:text-purple-300"
