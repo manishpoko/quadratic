@@ -1,7 +1,7 @@
-CREATE TYPE task_status as ENUM('pending', 'in process', 'delayed', 'completed');
+CREATE TYPE issue_status as ENUM('pending', 'in process', 'delayed', 'completed');
 
 
-CREATE TYPE task_priority as ENUM ('light', 'moderate', 'urgent', 'high-priority');
+CREATE TYPE issue_priority as ENUM ('light', 'moderate', 'urgent', 'high-priority');
 
 
 CREATE TABLE users(
@@ -15,7 +15,7 @@ CREATE TABLE users(
 
 CREATE TABLE issues(
     id UUID PRIMARY KEY,
-    user_id UNIQUE TEXT NOT NULL,
+    user_id UUID NOT NULL REFERENCES users(id),
     title TEXT NOT NULL,
     description TEXT ,
         status task_status DEFAULT 'pending'
@@ -25,5 +25,13 @@ CREATE TABLE issues(
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE 
+CREATE TABLE session(
+    -- //this is the sessions_id
+    id UUID PRIMARY KEY,
+    user_id UUID NOT NULL REFERENCES users(id),
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    expires_at TIMESTAMP NOT NULL 
+    
+)
+
 
