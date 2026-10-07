@@ -18,20 +18,19 @@ CREATE TABLE issues(
     user_id UUID NOT NULL REFERENCES users(id),
     title TEXT NOT NULL,
     description TEXT ,
-        status task_status DEFAULT 'pending'
-,
-    priority task_priority DEFAULT 'moderate',
+    status issue_status DEFAULT 'pending',
+    priority issue_priority DEFAULT 'moderate',
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
-CREATE TABLE session(
+CREATE TABLE sessions(
     -- //this is the sessions_id
     id UUID PRIMARY KEY,
     user_id UUID NOT NULL REFERENCES users(id),
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     expires_at TIMESTAMP NOT NULL 
     
-)
+);
 
 
