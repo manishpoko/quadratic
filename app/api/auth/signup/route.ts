@@ -1,3 +1,6 @@
+import pool from "@/app/lib/db";
+
+
 export async function POST(request: Request) {
   const data = await request.json();
 
@@ -27,7 +30,27 @@ export async function POST(request: Request) {
     );
   }
 
+
+//check for duplicate email - 
+
+  const result = await pool.query(
+  "SELECT id FROM users WHERE email = $1",
+  [data.email]
+
+)
+
+  if(result.rows.length >0) {
+
+    return Response.json( {message: "email already exists"}, {status: 409})
+  }
+
+  //if all clears-
+
   return Response.json({
     message: "validation passed",
   });
+
+
 }
+
+
