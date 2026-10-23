@@ -12,7 +12,22 @@ export async function POST(request: Request) {
     );
   }
 
-  if(typeof data.email !== "string" || data.email())
+  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-  return Response.json({ email: data.email });
+  if (typeof data.email !== "string" || !data.email.trim() || !emailPattern.test(data.email)) {
+    return Response.json({ error: "invalid email" }, { status: 400 });
+  }
+
+  if (typeof data.password != "string" || data.password.length < 8) {
+    return Response.json(
+      {
+        error: "password required",
+      },
+      { status: 400 },
+    );
+  }
+
+  return Response.json({
+    message: "validation passed",
+  });
 }
