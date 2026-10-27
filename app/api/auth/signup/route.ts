@@ -72,7 +72,7 @@ export async function POST(request: Request) {
   //generate session after a successful new user creation -
   const sessionToken = randomBytes(32).toString("hex") 
 
-  const tokenHash = createHash("sha256").update(sessionToken).digest('hex')
+  const tokenHash = createHash("sha256").update(sessionToken).digest('hex') 
 
   const sessionId = randomUUID()
 
@@ -85,6 +85,10 @@ export async function POST(request: Request) {
 
   )
 
+  //sessionToken is just the token for the browser and cookies, while tokenHash is stored in the db(server). while verifying, sessionToken comes from the client (cookies) and is compared with the server (db)'s tokenHash to see if the user exists already.
+
+  
+  //define and set cookies-
   const cookieStore = await cookies();
 
   cookieStore.set("quadratic_session", sessionToken, {
