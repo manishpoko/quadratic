@@ -4,6 +4,10 @@ import argon2 from "argon2";
 
 import { randomUUID } from "node:crypto";
 
+import { randomBytes, createHash } from "node:crypto";
+
+import { cookies } from "next/headers";
+
 
 
 
@@ -40,11 +44,11 @@ export async function POST(request: Request) {
     );
   }
 
+  const email = data.email.trim().toLowerCase()
+
   //check for duplicate email -
 
-  const existingUser = await pool.query("SELECT id FROM users WHERE email = $1", [
-    data.email,
-  ]);
+  const existingUser = await pool.query("SELECT id FROM users WHERE email = $1", [email]);
 
   if (existingUser.rows.length > 0) {
     return Response.json({ message: "email already exists" }, { status: 409 });
@@ -54,7 +58,6 @@ export async function POST(request: Request) {
   //hash password 
   const hashedPassword = await argon2.hash(data.password)
 
-  console.log(`argon 2 works, as - ${hashedPassword}`)
 
   //create new user in postgres - 
 
@@ -63,8 +66,34 @@ export async function POST(request: Request) {
     `INSERT INTO users (id, name, email, password_hash)
     VALUES ($1, $2, $3, $4)
     RETURNING id, name, email`,
-    [userId, data.name.trim(), data.email.trim().toLowerCase(), hashedPassword]
+    [userId, data.name.trim(), email, hashedPassword]
   )
+
+  //generate session after a successful new user creation -
+  const sessionToken = randomBytes(32).toString("hex") 
+
+  const tokenHash = createHash("sha256").update(sessionToken).digest('hex')
+
+  const sessionId = randomUUID()
+
+  const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
+
+  const newSession= await pool.query(
+    `INSERT INTO sessions (id, user_id, token_hash, expires_at)
+    VALUES ($1, $2, $3, $4)`,
+    [sessionId, userId, tokenHash, expiresAt]
+
+  )
+
+  const cookieStore = await cookies();
+
+  cookieStore.set("quadratic_session", sessionToken, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV==='production',
+    sameSite: "lax",
+    path: '/',
+    expires: expiresAt
+  })
 
   return Response.json(
   {
@@ -74,11 +103,11 @@ export async function POST(request: Request) {
   { status: 201 }
 );
 
-  //if all clears-
 
-  return Response.json({
-    message: "validation passed",
-  });
+
+
+
+
 
 
 
