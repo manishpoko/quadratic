@@ -78,7 +78,7 @@ export async function POST(request: Request) {
 
   const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
 
-  const newSession= await pool.query(
+  await pool.query(
     `INSERT INTO sessions (id, user_id, token_hash, expires_at)
     VALUES ($1, $2, $3, $4)`,
     [sessionId, userId, tokenHash, expiresAt]
