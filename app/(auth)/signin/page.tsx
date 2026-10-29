@@ -1,6 +1,68 @@
+'use client'; //because it has submit and form logic that needs client side access
+
 import Link from "next/link";
 
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+
+
+
+
 export default function SigninPage() {
+
+
+  const router = useRouter();
+
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false)
+
+  async function HandleSubmit(event: React.SubmitEvent<HTMLFormElement>) {
+
+    event.preventDefault();
+    setError("")
+    setLoading(true)
+
+    const formData = new FormData(event.currentTarget); //reads values from your existing input
+
+    const email = formData.get("email")
+    const password = formData.get("password")
+
+    try{
+          const response = await fetch('/api/auth/signin',  {
+            
+
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      }, 
+      body: JSON.stringify({email, password})
+
+    }
+    )
+
+    const data = await response.json()
+
+    if (!response.ok) {
+      setError(data.message ||  "unable to sign in");
+      return;
+    }
+
+    router.push('/dashboard');
+    router.refresh()
+    } catch {
+      setError("something went wrong, try again")
+
+    } finally {
+      setLoading(false)
+    }
+
+
+
+  }
+
+
+
+
   return (
     <main className="flex min-h-[calc(100vh-4rem)] items-center justify-center px-6 py-16">
       <div className="w-full max-w-md">
@@ -22,7 +84,7 @@ export default function SigninPage() {
           </p>
         </div>
 
-        <form className="mt-8 space-y-5">
+        <form onSubmit={HandleSubmit} className="mt-8 space-y-5">
 
           <div>
             <label
@@ -66,12 +128,23 @@ export default function SigninPage() {
             />
           </div>
 
+          {
+            error &&(
+              <p role="alert" className="text-sm text-red-400"
+              >
+                {error}
+
+              </p>
+            )
+          }
+
           
           <button
             type="submit"
-            className="w-full rounded-lg bg-purple-600 px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-purple-500"
+            disabled={loading}
+            className="w-full rounded-lg bg-purple-600 px-4 py-3 text-sm font-medium text-white transition-colors hover:bg-purple-500 cursor-pointer"
           >
-            Sign in
+            {loading? "signing in..." : "sign in" }
           </button>
         </form>
 

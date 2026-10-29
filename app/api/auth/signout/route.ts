@@ -3,9 +3,9 @@ import { cookies } from "next/headers"
 import { redirect } from "next/navigation"
 import pool from "@/app/lib/db"
 
-export async function POST(request: Request) {
+export async function POST() {
 
-    const data = await request.json()
+    //const data = await request.json() --signout doesnt need a request body, so it doesnt parse any json that is incoming, hence this line is not needed in signout
 
     const cookieStore = await cookies()
 

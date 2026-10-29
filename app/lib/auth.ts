@@ -12,7 +12,7 @@ const cookieStore = await cookies()
 
 //read the session cookie-
 const sessionCookie = cookieStore.get('quadratic_session')
-if(!sessionCookie) {redirect ('/login')}
+if(!sessionCookie) {redirect ('/signin')}
 
 //hash the token from the cookie - 
 const tokenHash = createHash('sha256').update(sessionCookie.value).digest('hex')
