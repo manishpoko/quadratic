@@ -16,7 +16,7 @@ export default function SigninPage() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false)
 
-  async function HandleSubmit(event: React.SubmitEvent<HTMLFormElement>) {
+  async function HandleSignin(event: React.SubmitEvent<HTMLFormElement>) {
 
     event.preventDefault();
     setError("")
@@ -84,7 +84,7 @@ export default function SigninPage() {
           </p>
         </div>
 
-        <form onSubmit={HandleSubmit} className="mt-8 space-y-5">
+        <form onSubmit={HandleSignin} className="mt-8 space-y-5">
 
           <div>
             <label
