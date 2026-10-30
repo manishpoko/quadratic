@@ -32,7 +32,7 @@ export default function SignupPage() {
       const data = await response.json(); //return the response as json
 
       if (!response.ok) {
-        setError(data.message || "unable to sign up");
+        setError(data.message || data.error || "unable to sign up");
         return;
       }
       router.push('/dashboard')
