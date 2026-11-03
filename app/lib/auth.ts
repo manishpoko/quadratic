@@ -1,4 +1,4 @@
-//all the protected route and authenticated access (cookies and sessions) code here - 
+//all the protected route and authenticated access (cookies and sessions) code here (basically validates the session cookie) - 
 
 import { cookies } from "next/headers";
 import { createHash } from "node:crypto";
