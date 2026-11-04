@@ -130,30 +130,26 @@ export async function PATCH(
         RETURNING *
 
         `,
-        [
-            title !== undefined,
-            title !== undefined ? title.trim() : null,
+    [
+      title !== undefined,
+      title !== undefined ? title.trim() : null,
 
-            
+      description !== undefined,
+      description,
 
-            description !== undefined,
-            description,
+      status !== undefined,
+      status,
 
-            status !== undefined,
-            status,
+      priority !== undefined,
+      priority,
 
-            priority !== undefined,
-            priority,
-
-            id,
-            user.id
-
-
-        ],
+      id,
+      user.id,
+    ],
   );
 
   //check whether the issue exists
-  if (data.rows.length !== 0) {
+  if (data.rows.length === 0) {
     return Response.json(
       {
         message: "issue not found",
@@ -162,7 +158,52 @@ export async function PATCH(
     );
   }
 
+  //returnu final updated response if all pass -
+  return Response.json(data.rows[0], { status: 200 });
+}
 
-  //returnu final updated response if all pass - 
-  return Response.json(data.rows[0], {status: 200})
+//DELETE -
+export async function DELETE(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  const { id } = await params;
+
+  const user = await getCurrentUser();
+
+  if (!user) {
+    return Response.json(
+      {
+        message: "unauthorised user",
+      },
+      { status: 401 },
+    );
+  }
+
+  const data = await pool.query(
+    `
+        DELETE FROM issues 
+        WHERE id = $1 AND user_id = $2
+        RETURNING *
+        `,
+    [id, user.id],
+  );
+
+  if (data.rows.length === 0) {
+    return Response.json(
+      {
+        message: "issue not found",
+      },
+      { status: 404 },
+    );
+  }
+
+  return Response.json(
+    {message: "issue deleted successfully",
+        issue: data.rows[0]
+    },
+    {status: 200},
+    
+
+  )
 }
