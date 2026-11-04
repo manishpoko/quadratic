@@ -1,28 +1,62 @@
+"use client";
+
+import { useState, useEffect } from "react";
+
+type Issue = {
+  id: string;
+  title: string;
+  description: string | null;
+  status: "pending" | "in process" | "delayed" | "completed";
+  priority: "light" | "moderate" | "urgent" | "high-priority";
+  created_at: string;
+  updated_at: string;
+};
 
 export default function DashboardPage() {
+  const [issues, setIssues] = useState<Issue[]>([]); //declaring that issues is an array of the type Issue objects
+
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  const [isModalOpen, setIsModalOpen] = useState(false); //for the create issue modal
+
+  useEffect(() => {
+    async function fetchIssues() {
+      try {
+        const response = await fetch("/api/issues");
+
+        if (!response.ok) {
+          throw new Error("cannot fetch issues");
+        }
+
+        const data = await response.json();
+
+        setIssues(data);
+      } catch (error) {
+        setError("unable to load issues");
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchIssues();
+  }, []);
+
   return (
     <div className="min-h-screen bg-zinc-950 text-white">
       <div className="mx-auto max-w-6xl px-6 py-10">
-
         {/* Dashboard header */}
         <section className="flex items-center justify-between border-b border-white/10 pb-6">
-          <h1 className="text-2xl font-bold tracking-tight">
-            Quadratic
-          </h1>
+          <h1 className="text-2xl font-bold tracking-tight">Quadratic</h1>
 
-          <p className="text-sm text-zinc-400">
-            Dashboard
-          </p>
+          <p className="text-sm text-zinc-400">Dashboard</p>
         </section>
 
         <main className="mt-10">
-
           {/* Page heading */}
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-3xl font-bold">
-                My issues
-              </h2>
+              <h2 className="text-3xl font-bold">My issues</h2>
 
               <p className="mt-2 text-sm text-zinc-400">
                 Track your work and keep things moving.
@@ -30,57 +64,167 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* Issue statistics */}
+          {/* Issue cards */}
           <section className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
-
             <div className="rounded-xl border border-white/10 bg-white/[0.03] p-5">
               <p className="text-sm text-zinc-400">All issues</p>
-              <h3 className="mt-3 text-3xl font-bold">0</h3>
+              <h3 className="mt-3 text-3xl font-bold">{issues.length}</h3>
             </div>
 
             <div className="rounded-xl border border-white/10 bg-white/[0.03] p-5">
               <p className="text-sm text-zinc-400">In progress</p>
-              <h3 className="mt-3 text-3xl font-bold">0</h3>
+              <h3 className="mt-3 text-3xl font-bold">
+                {issues.filter((issue) => issue.status === "in process").length}
+              </h3>
             </div>
 
             <div className="rounded-xl border border-white/10 bg-white/[0.03] p-5">
               <p className="text-sm text-zinc-400">Completed</p>
-              <h3 className="mt-3 text-3xl font-bold">0</h3>
+              <h3 className="mt-3 text-3xl font-bold">
+                {issues.filter((issue) => issue.status === "completed").length}
+              </h3>
             </div>
-
           </section>
 
           {/* Recent issues */}
-          <section className="mt-10">
 
-            <div className="flex items-center justify-between">
-              <h2 className="text-xl font-semibold">
-                Recent issues
-              </h2>
-
-              <button
-                type="button"
-                className="rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-purple-500"
-              >
-                + New issue
-              </button>
-            </div>
-
-            {/* Empty state */}
+          <button
+            onClick={() => setIsModalOpen(true)}
+            type="button"
+            className="rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-purple-500"
+          >
+            + New issue
+          </button>
+          {loading ? (
+            <p className="mt-5 text-zinc-400">Loading issues...</p>
+          ) : error ? (
+            <p className="mt-5 text-red-400">{error}</p>
+          ) : issues.length === 0 ? (
             <div className="mt-5 flex flex-col items-center justify-center rounded-xl border border-white/10 bg-white/[0.03] px-6 py-16 text-center">
-
-              <h3 className="text-lg font-medium">
-                No issues yet
-              </h3>
-
+              <h3 className="text-lg font-medium">No issues yet</h3>
               <p className="mt-2 text-sm text-zinc-400">
                 Create your first issue to get started.
               </p>
-
             </div>
+          ) : (
+            <div className="mt-5 space-y-3">
+              {issues.map((issue) => (
+                <div
+                  key={issue.id}
+                  className="rounded-xl border border-white/10 bg-white/[0.03] p-5"
+                >
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-semibold">{issue.title}</h3>
+                    <span className="text-sm text-zinc-400">
+                      {issue.status}
+                    </span>
+                  </div>
 
-          </section>
+                  <p className="mt-2 text-sm text-zinc-400">
+                    {issue.description || "No description provided"}
+                  </p>
 
+                  <p className="mt-3 text-xs text-zinc-500">
+                    Priority: {issue.priority}
+                  </p>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* "add issue" modal logic and ui -  */}
+          {isModalOpen && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
+              <div className="w-full max-w-lg rounded-2xl border border-white/10 bg-zinc-900 p-6 shadow-2xl">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-xl font-semibold">Create issue</h2>
+
+                  <button
+                    type="button"
+                    onClick={() => setIsModalOpen(false)}
+                    className="text-zinc-400 hover:text-white"
+                  >
+                    ✕
+                  </button>
+                </div>
+
+                <form className="mt-6 space-y-4">
+                  <div>
+                    <label className="mb-2 block text-sm text-zinc-300">
+                      Title
+                    </label>
+                    <input
+                      name="title"
+                      required
+                      placeholder="What needs to be done?"
+                      className="w-full rounded-lg border border-white/10 bg-zinc-800 px-3 py-2 text-white outline-none focus:border-purple-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="mb-2 block text-sm text-zinc-300">
+                      Description
+                    </label>
+                    <textarea
+                      name="description"
+                      rows={3}
+                      placeholder="Add some details..."
+                      className="w-full rounded-lg border border-white/10 bg-zinc-800 px-3 py-2 text-white outline-none focus:border-purple-500"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="mb-2 block text-sm text-zinc-300">
+                      Status
+                    </label>
+                    <select
+                      name="status"
+                      defaultValue="pending"
+                      className="w-full rounded-lg border border-white/10 bg-zinc-800 px-3 py-2 text-white"
+                    >
+                      <option value="pending">Pending</option>
+                      <option value="in process">In progress</option>
+                      <option value="delayed">Delayed</option>
+                      <option value="completed">Completed</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="mb-2 block text-sm text-zinc-300">
+                      Priority
+                    </label>
+                    <select
+                      name="priority"
+                      defaultValue="moderate"
+                      className="w-full rounded-lg border border-white/10 bg-zinc-800 px-3 py-2 text-white"
+                    >
+                      <option value="light">Low</option>
+                      <option value="moderate">Medium</option>
+                      <option value="urgent">Urgent</option>
+                      <option value="high-priority">High</option>
+                    </select>
+                  </div>
+
+                  <div className="flex justify-end gap-3 pt-2">
+                    <button
+                      type="button"
+                      onClick={() => setIsModalOpen(false)}
+                      className="rounded-lg border border-white/10 px-4 py-2 text-sm text-zinc-300 hover:bg-white/5"
+                    >
+                      Cancel
+                    </button>
+
+                    <button
+                      type="submit"
+                      className="rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white hover:bg-purple-500"
+                    >
+                      Create issue
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
         </main>
       </div>
     </div>
