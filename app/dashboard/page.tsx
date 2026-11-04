@@ -47,7 +47,9 @@ export default function DashboardPage() {
   async function HandleCreateIssue(event: React.SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    const formData = new FormData(event.currentTarget);
+    const form = event.currentTarget;
+
+    const formData = new FormData(form);
 
     setLoading(true);
     setError("");
@@ -76,7 +78,9 @@ export default function DashboardPage() {
       }
 
       setIssues((previousIssues) => [newIssue, ...previousIssues]);
-      setIsModalOpen(false)
+
+      form.reset(); //reset the form
+      setIsModalOpen(false);
     } catch {
       setError("something went wrong, try again");
     } finally {
@@ -157,7 +161,7 @@ export default function DashboardPage() {
                 >
                   <div className="flex items-center justify-between">
                     <h3 className="font-semibold">{issue.title}</h3>
-                    <span className="text-sm text-zinc-400">
+                    <span className="rounded-full border border-purple-500/30 bg-purple-500/10 px-3 py-1 text-xs text-purple-300">
                       {issue.status}
                     </span>
                   </div>
@@ -166,8 +170,9 @@ export default function DashboardPage() {
                     {issue.description || "No description provided"}
                   </p>
 
-                  <p className="mt-3 text-xs text-zinc-500">
-                    Priority: {issue.priority}
+                  <p className="mt-3 text-xs text-zinc-400">
+                    Priority:
+                    <span className="text-white">{issue.priority}</span>
                   </p>
                 </div>
               ))}
@@ -258,9 +263,10 @@ export default function DashboardPage() {
 
                     <button
                       type="submit"
+                      disabled={loading}
                       className="rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white hover:bg-purple-500"
                     >
-                      Create issue
+                      {loading ? "creating new issue" : "create new issue"}
                     </button>
                   </div>
                 </form>
