@@ -42,6 +42,48 @@ export default function DashboardPage() {
     fetchIssues();
   }, []);
 
+  //create issue handler -
+
+  async function HandleCreateIssue(event: React.SubmitEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    const formData = new FormData(event.currentTarget);
+
+    setLoading(true);
+    setError("");
+
+    const title = formData.get("title");
+    const description = formData.get("description");
+    const priority = formData.get("priority");
+    const status = formData.get("status");
+
+    try {
+      const response = await fetch("/api/issues", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ title, description, status, priority }),
+      });
+
+      const newIssue = await response.json();
+
+      if (!response.ok) {
+        setError(
+          newIssue.message || newIssue.error || "unable to create new issue",
+        );
+        return;
+      }
+
+      setIssues((previousIssues) => [newIssue, ...previousIssues]);
+      setIsModalOpen(false)
+    } catch {
+      setError("something went wrong, try again");
+    } finally {
+      setLoading(false);
+    }
+  }
+
   return (
     <div className="min-h-screen bg-zinc-950 text-white">
       <div className="mx-auto max-w-6xl px-6 py-10">
@@ -132,7 +174,7 @@ export default function DashboardPage() {
             </div>
           )}
 
-          {/* "add issue" modal logic and ui -  */}
+          {/* "create new issue" modal logic and ui -  */}
           {isModalOpen && (
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
               <div className="w-full max-w-lg rounded-2xl border border-white/10 bg-zinc-900 p-6 shadow-2xl">
@@ -148,7 +190,7 @@ export default function DashboardPage() {
                   </button>
                 </div>
 
-                <form className="mt-6 space-y-4">
+                <form onSubmit={HandleCreateIssue} className="mt-6 space-y-4">
                   <div>
                     <label className="mb-2 block text-sm text-zinc-300">
                       Title
