@@ -18,6 +18,8 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  const [creating, setCreating] = useState(false); //for creating and updating an issue, both times this is usefule
+
   const [isModalOpen, setIsModalOpen] = useState(false); //for the create issue modal
 
   const [selectedIssue, setSelectedIssue] = useState<Issue | null>(null); //null by default unless the issue is selected by you - this is to store the state of the issue you want to edit
@@ -46,59 +48,65 @@ export default function DashboardPage() {
 
   //create issue handler (form) -
 
-  async function HandleCreateIssue(event: React.SubmitEvent<HTMLFormElement>) {
+  async function HandleSubmitIssue(event: React.SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
 
     const form = event.currentTarget;
 
     const formData = new FormData(form);
 
-    setLoading(true);
+    setCreating(true);
     setError("");
 
-    const title = formData.get("title");
+    const title = String(formData.get("title") ?? "");
     const description = formData.get("description");
     const priority = formData.get("priority");
     const status = formData.get("status");
 
+    const isEditing = selectedIssue !== null;
+
+    const url = isEditing ? `/api/issues/${selectedIssue.id}` : `/api/issues`;
+    const method = isEditing ? "PATCH" : "POST";
+
     try {
-      const response = await fetch("/api/issues", {
-        method: "POST",
+      const response = await fetch(url, {
+        method,
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ title, description, status, priority }),
       });
 
-      const newIssue = await response.json();
+      const savedIssue = await response.json();
 
       if (!response.ok) {
         setError(
-          newIssue.message || newIssue.error || "unable to create new issue",
+          savedIssue.message || savedIssue.error || "unable to save issue",
         );
         return;
       }
 
-      setIssues((previousIssues) => [newIssue, ...previousIssues]);
+      if (isEditing) {
+        //if you are editing a previousIssue, it maps its id with previousIssue and swaps the new vaue with the old one while returning a new map of previousIssues
+        setIssues((previousIssues) =>
+          previousIssues.map((issue) =>
+            issue.id === savedIssue.id ? savedIssue : issue,
+          ),
+        );
+      } else {
+        //save the new issue into the list of issues (previousIssues)
+        setIssues((previousIssues) => [savedIssue, ...previousIssues]);
+      }
 
       form.reset(); //reset the form
       setIsModalOpen(false);
+      setSelectedIssue(null);
     } catch {
       setError("something went wrong, try again");
     } finally {
-      setLoading(false);
+      setCreating(false);
     }
   }
-
-  // //Edit issue handler
-  // async function handleEditIssue(event: React.SubmitEvent<HTMLFormElement>) {
-  //   event.preventDefault();
-  //   const form = event.currentTarget;
-  //   const formData = new FormData(form);
-
-  //   setLoading(true);
-  //   setError("");
-  // }
 
   return (
     <div className="min-h-screen bg-zinc-950 text-white">
@@ -147,7 +155,10 @@ export default function DashboardPage() {
           {/* Recent issues */}
 
           <button
-            onClick={() => setIsModalOpen(true)}
+            onClick={() => {
+              setIsModalOpen(true);
+              setSelectedIssue(null);
+            }}
             type="button"
             className="rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-purple-500"
           >
@@ -207,18 +218,23 @@ export default function DashboardPage() {
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
               <div className="w-full max-w-lg rounded-2xl border border-white/10 bg-zinc-900 p-6 shadow-2xl">
                 <div className="flex items-center justify-between">
-                  <h2 className="text-xl font-semibold">{selectedIssue? "Edit Issue" : "Create issue"}</h2>
+                  <h2 className="text-xl font-semibold">
+                    {selectedIssue ? "Edit Issue" : "Create issue"}
+                  </h2>
 
                   <button
                     type="button"
-                    onClick={() => {setIsModalOpen(false); setSelectedIssue(null)}}
+                    onClick={() => {
+                      setIsModalOpen(false);
+                      setSelectedIssue(null);
+                    }}
                     className="text-zinc-400 hover:text-white"
                   >
                     ✕
                   </button>
                 </div>
 
-                <form onSubmit={HandleCreateIssue} className="mt-6 space-y-4">
+                <form onSubmit={HandleSubmitIssue} className="mt-6 space-y-4">
                   <div>
                     <label className="mb-2 block text-sm text-zinc-300">
                       Title
@@ -226,7 +242,7 @@ export default function DashboardPage() {
                     <input
                       name="title"
                       required
-                      defaultValue={selectedIssue ?.title ?? ""}
+                      defaultValue={selectedIssue?.title ?? ""}
                       placeholder="What needs to be done?"
                       className="w-full rounded-lg border border-white/10 bg-zinc-800 px-3 py-2 text-white outline-none focus:border-purple-500"
                     />
@@ -267,7 +283,7 @@ export default function DashboardPage() {
                     </label>
                     <select
                       name="priority"
-                      defaultValue={selectedIssue?.priority?? "moderate"}
+                      defaultValue={selectedIssue?.priority ?? "moderate"}
                       className="w-full rounded-lg border border-white/10 bg-zinc-800 px-3 py-2 text-white"
                     >
                       <option value="light">Low</option>
@@ -280,21 +296,24 @@ export default function DashboardPage() {
                   <div className="flex justify-end gap-3 pt-2">
                     <button
                       type="button"
-                      onClick={() => {setIsModalOpen(false); setSelectedIssue(null)}}
+                      onClick={() => {
+                        setIsModalOpen(false);
+                        setSelectedIssue(null);
+                      }}
                       className="rounded-lg border border-white/10 px-4 py-2 text-sm text-zinc-300 hover:bg-white/5"
                     >
                       Cancel
                     </button>
-
                     <button
                       type="submit"
-                      disabled={loading}
-                      
-                      className="rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white hover:bg-purple-500"
+                      disabled={creating}
+                      className="rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white hover:bg-purple-500 disabled:opacity-50"
                     >
-                      {selectedIssue? "submit edit" : "create new issue"}
-                      
-                      
+                      {creating
+                        ? "Saving..."
+                        : selectedIssue
+                          ? "Save changes"
+                          : "Create issue"}
                     </button>
                   </div>
                 </form>
