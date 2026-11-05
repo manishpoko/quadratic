@@ -20,6 +20,8 @@ export default function DashboardPage() {
 
   const [isModalOpen, setIsModalOpen] = useState(false); //for the create issue modal
 
+  const [selectedIssue, setSelectedIssue] = useState<Issue | null>(null); //null by default unless the issue is selected by you - this is to store the state of the issue you want to edit
+
   useEffect(() => {
     async function fetchIssues() {
       try {
@@ -42,7 +44,7 @@ export default function DashboardPage() {
     fetchIssues();
   }, []);
 
-  //create issue handler -
+  //create issue handler (form) -
 
   async function HandleCreateIssue(event: React.SubmitEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -87,6 +89,16 @@ export default function DashboardPage() {
       setLoading(false);
     }
   }
+
+  // //Edit issue handler
+  // async function handleEditIssue(event: React.SubmitEvent<HTMLFormElement>) {
+  //   event.preventDefault();
+  //   const form = event.currentTarget;
+  //   const formData = new FormData(form);
+
+  //   setLoading(true);
+  //   setError("");
+  // }
 
   return (
     <div className="min-h-screen bg-zinc-950 text-white">
@@ -161,9 +173,20 @@ export default function DashboardPage() {
                 >
                   <div className="flex items-center justify-between">
                     <h3 className="font-semibold">{issue.title}</h3>
-                    <span className="rounded-full border border-purple-500/30 bg-purple-500/10 px-3 py-1 text-xs text-purple-300">
+
+                    <span className="rounded-full border border-purple-500/30 bg-purple-500/10 px-3 py-1 text-xs text-purple-300 ">
                       {issue.status}
                     </span>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSelectedIssue(issue);
+                        setIsModalOpen(true);
+                      }}
+                      className="text-sm text-purple-400 hover:text-purple-300"
+                    >
+                      Edit Issue
+                    </button>
                   </div>
 
                   <p className="mt-2 text-sm text-zinc-400">
@@ -184,11 +207,11 @@ export default function DashboardPage() {
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
               <div className="w-full max-w-lg rounded-2xl border border-white/10 bg-zinc-900 p-6 shadow-2xl">
                 <div className="flex items-center justify-between">
-                  <h2 className="text-xl font-semibold">Create issue</h2>
+                  <h2 className="text-xl font-semibold">{selectedIssue? "Edit Issue" : "Create issue"}</h2>
 
                   <button
                     type="button"
-                    onClick={() => setIsModalOpen(false)}
+                    onClick={() => {setIsModalOpen(false); setSelectedIssue(null)}}
                     className="text-zinc-400 hover:text-white"
                   >
                     ✕
@@ -203,6 +226,7 @@ export default function DashboardPage() {
                     <input
                       name="title"
                       required
+                      defaultValue={selectedIssue ?.title ?? ""}
                       placeholder="What needs to be done?"
                       className="w-full rounded-lg border border-white/10 bg-zinc-800 px-3 py-2 text-white outline-none focus:border-purple-500"
                     />
@@ -215,6 +239,7 @@ export default function DashboardPage() {
                     <textarea
                       name="description"
                       rows={3}
+                      defaultValue={selectedIssue?.description ?? ""}
                       placeholder="Add some details..."
                       className="w-full rounded-lg border border-white/10 bg-zinc-800 px-3 py-2 text-white outline-none focus:border-purple-500"
                     />
@@ -226,7 +251,7 @@ export default function DashboardPage() {
                     </label>
                     <select
                       name="status"
-                      defaultValue="pending"
+                      defaultValue={selectedIssue?.status ?? "pending"}
                       className="w-full rounded-lg border border-white/10 bg-zinc-800 px-3 py-2 text-white"
                     >
                       <option value="pending">Pending</option>
@@ -242,7 +267,7 @@ export default function DashboardPage() {
                     </label>
                     <select
                       name="priority"
-                      defaultValue="moderate"
+                      defaultValue={selectedIssue?.priority?? "moderate"}
                       className="w-full rounded-lg border border-white/10 bg-zinc-800 px-3 py-2 text-white"
                     >
                       <option value="light">Low</option>
@@ -255,7 +280,7 @@ export default function DashboardPage() {
                   <div className="flex justify-end gap-3 pt-2">
                     <button
                       type="button"
-                      onClick={() => setIsModalOpen(false)}
+                      onClick={() => {setIsModalOpen(false); setSelectedIssue(null)}}
                       className="rounded-lg border border-white/10 px-4 py-2 text-sm text-zinc-300 hover:bg-white/5"
                     >
                       Cancel
@@ -264,9 +289,12 @@ export default function DashboardPage() {
                     <button
                       type="submit"
                       disabled={loading}
+                      
                       className="rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white hover:bg-purple-500"
                     >
-                      {loading ? "creating new issue" : "create new issue"}
+                      {selectedIssue? "submit edit" : "create new issue"}
+                      
+                      
                     </button>
                   </div>
                 </form>
