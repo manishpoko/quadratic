@@ -108,6 +108,48 @@ export default function DashboardPage() {
     }
   }
 
+
+  async function HandleDeleteIssue(issueId: string) {
+
+    setLoading(true)
+    setError("")
+
+
+    const confirmed = window.confirm("are you sure")
+    if(!confirmed) {return}
+
+    try {
+
+    //take the id - 
+    const response = await fetch(`/api/issues/${issueId}`, {
+      method: "DELETE"
+    }, )
+
+          if (!response.ok) {
+        
+        return Response.json("deleted issue successfully");
+      }
+
+
+    setIssues((previousIssues) => previousIssues.filter((issue) => issue.id !== issueId))
+      
+    } catch  {
+      setError("something went wrong, try again");
+
+      
+    } finally{
+      setLoading(false)
+    }
+
+
+
+
+    
+  }
+
+
+
+
   return (
     <div className="min-h-screen bg-zinc-950 text-white">
       <div className="mx-auto max-w-6xl px-6 py-10">
@@ -197,6 +239,14 @@ export default function DashboardPage() {
                       className="text-sm text-purple-400 hover:text-purple-300"
                     >
                       Edit Issue
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => HandleDeleteIssue(issue.id)}
+                      className="text-sm text-red-400 hover:text-red-300"
+                    >
+                      Delete
                     </button>
                   </div>
 
