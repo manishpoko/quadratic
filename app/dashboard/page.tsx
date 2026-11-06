@@ -24,6 +24,12 @@ export default function DashboardPage() {
 
   const [selectedIssue, setSelectedIssue] = useState<Issue | null>(null); //null by default unless the issue is selected by you - this is to store the state of the issue you want to edit
 
+
+  //issues need to be filtered too - 
+const [statusFilter, setStatusFilter ] = useState("all")
+
+
+
   useEffect(() => {
     async function fetchIssues() {
       try {
