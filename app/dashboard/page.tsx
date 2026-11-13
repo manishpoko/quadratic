@@ -24,19 +24,25 @@ export default function DashboardPage() {
 
   const [selectedIssue, setSelectedIssue] = useState<Issue | null>(null); //null by default unless the issue is selected by you - this is to store the state of the issue you want to edit
 
-
-  //issues need to be filtered too - 
-  const [statusFilter, setStatusFilter ] = useState("all")
+  //issues need to be filtered too -
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [priorityFilter, setPriorityFilter] = useState("all");
 
   const filteredIssues = issues.filter((issue) => {
-    if(statusFilter === "all") {
+    if (statusFilter === "all") {
       return true;
-    } 
+    }
 
-    return issue.status === statusFilter
-  })
+    return issue.status === statusFilter;
+  });
 
+  const filterByPriority = issues.filter((issue) => {
+    if (priorityFilter === "all") {
+      return true;
+    }
 
+    return issue.priority === priorityFilter;
+  });
 
   useEffect(() => {
     async function fetchIssues() {
@@ -122,47 +128,34 @@ export default function DashboardPage() {
     }
   }
 
-
   async function HandleDeleteIssue(issueId: string) {
+    setLoading(true);
+    setError("");
 
-    setLoading(true)
-    setError("")
-
-
-    const confirmed = window.confirm("are you sure")
-    if(!confirmed) {return}
+    const confirmed = window.confirm("are you sure");
+    if (!confirmed) {
+      return;
+    }
 
     try {
+      //take the id -
+      const response = await fetch(`/api/issues/${issueId}`, {
+        method: "DELETE",
+      });
 
-    //take the id - 
-    const response = await fetch(`/api/issues/${issueId}`, {
-      method: "DELETE"
-    }, )
-
-          if (!response.ok) {
-        
+      if (!response.ok) {
         return Response.json("deleted issue successfully");
       }
 
-
-    setIssues((previousIssues) => previousIssues.filter((issue) => issue.id !== issueId))
-      
-    } catch  {
+      setIssues((previousIssues) =>
+        previousIssues.filter((issue) => issue.id !== issueId),
+      );
+    } catch {
       setError("something went wrong, try again");
-
-      
-    } finally{
-      setLoading(false)
+    } finally {
+      setLoading(false);
     }
-
-
-
-
-    
   }
-
-
-
 
   return (
     <div className="min-h-screen bg-zinc-950 text-white">
@@ -189,26 +182,42 @@ export default function DashboardPage() {
           {/* //filter issues -  */}
 
           <div className="mt-6 flex flex-wrap gap-2">
-
             {["all", "pending", "in process", "delayed", "completed"].map(
               (status) => (
                 <button
-                key={status}
-                type="button"
-                onClick={() => setStatusFilter(status)}
-                className={`rounded-lg px-4 py-2 text-sm capitalize
-                  ${ statusFilter === status? "bg-purple-600 text-white" : "bg-white/5 text-zinc-400 hover:bg-white/10" 
-
-                  }` }
+                  key={status}
+                  type="button"
+                  onClick={() => setStatusFilter(status)}
+                  className={`rounded-lg px-4 py-2 text-sm capitalize
+                  ${
+                    statusFilter === status
+                      ? "bg-violet-700 text-white"
+                      : "bg-white/5 text-zinc-400 hover:bg-white/10"
+                  }`}
                 >
-
-                  {status === "all"? "All issues" : status}
+                  {status === "all" ? "All issues" : status}
                 </button>
-
-            )
-
+              ),
             )}
+          </div>
 
+          {/* filter prioritywise -  */}
+          <div className="mt-6 flex flex-wrap gap-2">
+            {["all", "light", "moderate", "urgent", "high-priority"].map((priority) => (
+              <button
+                key={priority}
+                type="button"
+                onClick={() => setPriorityFilter(priority)}
+                className={`rounded-lg px-4 py-2 text-sm capitalize
+                  ${
+                    priorityFilter === priority
+                      ? "bg-indigo-700 text-white"
+                      : "bg-white/5 text-zinc-400 hover:bg-white/10"
+                  }`}
+              >
+                {priority === "all" ? "All issues" : priority}
+              </button>
+            ))}
           </div>
 
           {/* Issue cards */}
@@ -269,6 +278,7 @@ export default function DashboardPage() {
                     <span className="rounded-full border border-purple-500/30 bg-purple-500/10 px-3 py-1 text-xs text-purple-300 ">
                       {issue.status}
                     </span>
+
                     <button
                       type="button"
                       onClick={() => {
