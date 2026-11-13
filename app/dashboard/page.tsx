@@ -26,7 +26,15 @@ export default function DashboardPage() {
 
 
   //issues need to be filtered too - 
-const [statusFilter, setStatusFilter ] = useState("all")
+  const [statusFilter, setStatusFilter ] = useState("all")
+
+  const filteredIssues = issues.filter((issue) => {
+    if(statusFilter === "all") {
+      return true;
+    } 
+
+    return issue.status === statusFilter
+  })
 
 
 
@@ -178,6 +186,31 @@ const [statusFilter, setStatusFilter ] = useState("all")
             </div>
           </div>
 
+          {/* //filter issues -  */}
+
+          <div className="mt-6 flex flex-wrap gap-2">
+
+            {["all", "pending", "in process", "delayed", "completed"].map(
+              (status) => (
+                <button
+                key={status}
+                type="button"
+                onClick={() => setStatusFilter(status)}
+                className={`rounded-lg px-4 py-2 text-sm capitalize
+                  ${ statusFilter === status? "bg-purple-600 text-white" : "bg-white/5 text-zinc-400 hover:bg-white/10" 
+
+                  }` }
+                >
+
+                  {status === "all"? "All issues" : status}
+                </button>
+
+            )
+
+            )}
+
+          </div>
+
           {/* Issue cards */}
           <section className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
             <div className="rounded-xl border border-white/10 bg-white/[0.03] p-5">
@@ -216,7 +249,7 @@ const [statusFilter, setStatusFilter ] = useState("all")
             <p className="mt-5 text-zinc-400">Loading issues...</p>
           ) : error ? (
             <p className="mt-5 text-red-400">{error}</p>
-          ) : issues.length === 0 ? (
+          ) : filteredIssues.length === 0 ? (
             <div className="mt-5 flex flex-col items-center justify-center rounded-xl border border-white/10 bg-white/[0.03] px-6 py-16 text-center">
               <h3 className="text-lg font-medium">No issues yet</h3>
               <p className="mt-2 text-sm text-zinc-400">
@@ -225,7 +258,7 @@ const [statusFilter, setStatusFilter ] = useState("all")
             </div>
           ) : (
             <div className="mt-5 space-y-3">
-              {issues.map((issue) => (
+              {filteredIssues.map((issue) => (
                 <div
                   key={issue.id}
                   className="rounded-xl border border-white/10 bg-white/[0.03] p-5"
