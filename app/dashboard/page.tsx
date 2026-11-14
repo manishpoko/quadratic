@@ -28,21 +28,18 @@ export default function DashboardPage() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [priorityFilter, setPriorityFilter] = useState("all");
 
+
+
   const filteredIssues = issues.filter((issue) => {
-    if (statusFilter === "all") {
-      return true;
-    }
+    const matchesStatus = statusFilter === "all" || issue.status === statusFilter ;
 
-    return issue.status === statusFilter;
-  });
+    const matchesPriority = priorityFilter === "all" || issue.priority === priorityFilter;
 
-  const filterByPriority = issues.filter((issue) => {
-    if (priorityFilter === "all") {
-      return true;
-    }
+    return matchesStatus && matchesPriority; //if both filters applied -> AND logic, otherwise only the applied filter works.
+  })
 
-    return issue.priority === priorityFilter;
-  });
+
+
 
   useEffect(() => {
     async function fetchIssues() {
@@ -128,14 +125,17 @@ export default function DashboardPage() {
     }
   }
 
+  //delete handler - 
+
   async function HandleDeleteIssue(issueId: string) {
-    setLoading(true);
     setError("");
 
     const confirmed = window.confirm("are you sure");
     if (!confirmed) {
       return;
     }
+    setLoading(true);
+
 
     try {
       //take the id -
@@ -191,7 +191,7 @@ export default function DashboardPage() {
                   className={`rounded-lg px-4 py-2 text-sm capitalize
                   ${
                     statusFilter === status
-                      ? "bg-violet-700 text-white"
+                      ? "bg-purple-800 text-white"
                       : "bg-white/5 text-zinc-400 hover:bg-white/10"
                   }`}
                 >
@@ -211,7 +211,7 @@ export default function DashboardPage() {
                 className={`rounded-lg px-4 py-2 text-sm capitalize
                   ${
                     priorityFilter === priority
-                      ? "bg-indigo-700 text-white"
+                      ? "bg-purple-800 text-white"
                       : "bg-white/5 text-zinc-400 hover:bg-white/10"
                   }`}
               >
@@ -228,7 +228,7 @@ export default function DashboardPage() {
             </div>
 
             <div className="rounded-xl border border-white/10 bg-white/[0.03] p-5">
-              <p className="text-sm text-zinc-400">In progress</p>
+              <p className="text-sm text-zinc-400">In process</p>
               <h3 className="mt-3 text-3xl font-bold">
                 {issues.filter((issue) => issue.status === "in process").length}
               </h3>
