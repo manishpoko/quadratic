@@ -28,18 +28,53 @@ export default function DashboardPage() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [priorityFilter, setPriorityFilter] = useState("all");
 
-
+  //sorting issues -
+  const [sortBy, setSortBy] = useState("newest");
 
   const filteredIssues = issues.filter((issue) => {
-    const matchesStatus = statusFilter === "all" || issue.status === statusFilter ;
+    const matchesStatus =
+      statusFilter === "all" || issue.status === statusFilter;
 
-    const matchesPriority = priorityFilter === "all" || issue.priority === priorityFilter;
+    const matchesPriority =
+      priorityFilter === "all" || issue.priority === priorityFilter;
 
     return matchesStatus && matchesPriority; //if both filters applied -> AND logic, otherwise only the applied filter works.
-  })
+  });
 
+  const sortedIssues = [
+    ...filteredIssues.sort((a, b) => {
+      //sort by creation date -
 
+      if (sortBy === "newest") {
+        return (
+          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        );
+      }
 
+      if (sortBy === "oldest") {
+        return (
+          new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+        );
+      }
+
+      // Define priority ranking
+      const priorityOrder = {
+        light: 1,
+        moderate: 2,
+        urgent: 3,
+        "high-priority": 4,
+      };
+      if (sortBy === "highest") {
+        return priorityOrder[b.priority] - priorityOrder[a.priority];
+      }
+
+      if (sortBy === "lowest") {
+        return priorityOrder[a.priority] - priorityOrder[b.priority];
+      }
+
+      return 0;
+    }),
+  ];
 
   useEffect(() => {
     async function fetchIssues() {
@@ -125,7 +160,7 @@ export default function DashboardPage() {
     }
   }
 
-  //delete handler - 
+  //delete handler -
 
   async function HandleDeleteIssue(issueId: string) {
     setError("");
@@ -135,7 +170,6 @@ export default function DashboardPage() {
       return;
     }
     setLoading(true);
-
 
     try {
       //take the id -
@@ -203,21 +237,38 @@ export default function DashboardPage() {
 
           {/* filter prioritywise -  */}
           <div className="mt-6 flex flex-wrap gap-2">
-            {["all", "light", "moderate", "urgent", "high-priority"].map((priority) => (
-              <button
-                key={priority}
-                type="button"
-                onClick={() => setPriorityFilter(priority)}
-                className={`rounded-lg px-4 py-2 text-sm capitalize
+            {["all", "light", "moderate", "urgent", "high-priority"].map(
+              (priority) => (
+                <button
+                  key={priority}
+                  type="button"
+                  onClick={() => setPriorityFilter(priority)}
+                  className={`rounded-lg px-4 py-2 text-sm capitalize
                   ${
                     priorityFilter === priority
                       ? "bg-purple-800 text-white"
                       : "bg-white/5 text-zinc-400 hover:bg-white/10"
                   }`}
-              >
-                {priority === "all" ? "All issues" : priority}
-              </button>
-            ))}
+                >
+                  {priority === "all" ? "All issues" : priority}
+                </button>
+              ),
+            )}
+          </div>
+
+          <div className="mt-6">
+            <label className="mr-3 text-sm text-zinc-400">Sort by:</label>
+
+            <select
+              value={sortBy}
+              onChange={(event) => setSortBy(event.target.value)}
+              className="rounded-lg border border-white/10 bg-zinc-900 px-4 py-2 text-sm text-white"
+            >
+              <option value="newest">Newest first</option>
+              <option value="oldest">Oldest first</option>
+              <option value="highest">Highest priority first</option>
+              <option value="lowest">Lowest priority first</option>
+            </select>
           </div>
 
           {/* Issue cards */}
@@ -267,7 +318,7 @@ export default function DashboardPage() {
             </div>
           ) : (
             <div className="mt-5 space-y-3">
-              {filteredIssues.map((issue) => (
+              {sortedIssues.map((issue) => (
                 <div
                   key={issue.id}
                   className="rounded-xl border border-white/10 bg-white/[0.03] p-5"
