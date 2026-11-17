@@ -295,26 +295,40 @@ export default function DashboardPage() {
           </div>
 
           {/* Issue cards */}
-          <section className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
-            <div className="rounded-xl border border-white/10 bg-white/[0.03] p-5">
-              <p className="text-sm text-zinc-400">All issues</p>
-              <h3 className="mt-3 text-3xl font-bold">{issues.length}</h3>
-            </div>
+<section className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
 
-            <div className="rounded-xl border border-white/10 bg-white/[0.03] p-5">
-              <p className="text-sm text-zinc-400">In process</p>
-              <h3 className="mt-3 text-3xl font-bold">
-                {issues.filter((issue) => issue.status === "in process").length}
-              </h3>
-            </div>
+  {/* Total issues */}
+  <div className="rounded-xl border border-white/10 bg-white/[0.03] p-5 transition hover:border-purple-500/30">
+    <p className="text-sm text-zinc-400">Total issues</p>
+    <h3 className="mt-3 text-3xl font-bold">{issues.length}</h3>
+    <p className="mt-1 text-xs text-zinc-500">
+      All your tracked issues
+    </p>
+  </div>
 
-            <div className="rounded-xl border border-white/10 bg-white/[0.03] p-5">
-              <p className="text-sm text-zinc-400">Completed</p>
-              <h3 className="mt-3 text-3xl font-bold">
-                {issues.filter((issue) => issue.status === "completed").length}
-              </h3>
-            </div>
-          </section>
+  {/* In progress */}
+  <div className="rounded-xl border border-white/10 bg-white/[0.03] p-5 transition hover:border-blue-500/30">
+    <p className="text-sm text-zinc-400">In progress</p>
+    <h3 className="mt-3 text-3xl font-bold text-blue-400">
+      {issues.filter((issue) => issue.status === "in process").length}
+    </h3>
+    <p className="mt-1 text-xs text-zinc-500">
+      Issues currently being worked on
+    </p>
+  </div>
+
+  {/* Completed */}
+  <div className="rounded-xl border border-white/10 bg-white/[0.03] p-5 transition hover:border-green-500/30">
+    <p className="text-sm text-zinc-400">Completed</p>
+    <h3 className="mt-3 text-3xl font-bold text-green-400">
+      {issues.filter((issue) => issue.status === "completed").length}
+    </h3>
+    <p className="mt-1 text-xs text-zinc-500">
+      Issues successfully completed
+    </p>
+  </div>
+
+</section>
 
           {/* Recent issues */}
 
