@@ -295,40 +295,38 @@ export default function DashboardPage() {
           </div>
 
           {/* Issue cards */}
-<section className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <section className="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-3">
+            {/* Total issues */}
+            <div className="rounded-xl border border-white/10 bg-white/[0.03] p-5 transition hover:border-purple-500/30">
+              <p className="text-sm text-zinc-400">Total issues</p>
+              <h3 className="mt-3 text-3xl font-bold">{issues.length}</h3>
+              <p className="mt-1 text-xs text-zinc-500">
+                All your tracked issues
+              </p>
+            </div>
 
-  {/* Total issues */}
-  <div className="rounded-xl border border-white/10 bg-white/[0.03] p-5 transition hover:border-purple-500/30">
-    <p className="text-sm text-zinc-400">Total issues</p>
-    <h3 className="mt-3 text-3xl font-bold">{issues.length}</h3>
-    <p className="mt-1 text-xs text-zinc-500">
-      All your tracked issues
-    </p>
-  </div>
+            {/* In progress */}
+            <div className="rounded-xl border border-white/10 bg-white/[0.03] p-5 transition hover:border-blue-500/30">
+              <p className="text-sm text-zinc-400">In progress</p>
+              <h3 className="mt-3 text-3xl font-bold text-blue-400">
+                {issues.filter((issue) => issue.status === "in process").length}
+              </h3>
+              <p className="mt-1 text-xs text-zinc-500">
+                Issues currently being worked on
+              </p>
+            </div>
 
-  {/* In progress */}
-  <div className="rounded-xl border border-white/10 bg-white/[0.03] p-5 transition hover:border-blue-500/30">
-    <p className="text-sm text-zinc-400">In progress</p>
-    <h3 className="mt-3 text-3xl font-bold text-blue-400">
-      {issues.filter((issue) => issue.status === "in process").length}
-    </h3>
-    <p className="mt-1 text-xs text-zinc-500">
-      Issues currently being worked on
-    </p>
-  </div>
-
-  {/* Completed */}
-  <div className="rounded-xl border border-white/10 bg-white/[0.03] p-5 transition hover:border-green-500/30">
-    <p className="text-sm text-zinc-400">Completed</p>
-    <h3 className="mt-3 text-3xl font-bold text-green-400">
-      {issues.filter((issue) => issue.status === "completed").length}
-    </h3>
-    <p className="mt-1 text-xs text-zinc-500">
-      Issues successfully completed
-    </p>
-  </div>
-
-</section>
+            {/* Completed */}
+            <div className="rounded-xl border border-white/10 bg-white/[0.03] p-5 transition hover:border-green-500/30">
+              <p className="text-sm text-zinc-400">Completed</p>
+              <h3 className="mt-3 text-3xl font-bold text-green-400">
+                {issues.filter((issue) => issue.status === "completed").length}
+              </h3>
+              <p className="mt-1 text-xs text-zinc-500">
+                Issues successfully completed
+              </p>
+            </div>
+          </section>
 
           {/* Recent issues */}
 
@@ -418,11 +416,16 @@ export default function DashboardPage() {
           {/* "create new issue" modal logic and ui -  */}
           {isModalOpen && (
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
-              <div className="w-full max-w-lg rounded-2xl border border-white/10 bg-zinc-900 p-6 shadow-2xl">
+              <div className="w-full max-w-lg rounded-2xl border border-white/10 bg-zinc-900 p-7 shadow-2xl">
                 <div className="flex items-center justify-between">
-                  <h2 className="text-xl font-semibold">
-                    {selectedIssue ? "Edit Issue" : "Create issue"}
+                  <h2 className="text-xl font-semibold tracking-tight">
+                    {selectedIssue ? "Edit issue" : "Create a new issue"}
                   </h2>
+                  <p className="mt-1 text-sm text-zinc-400">
+                    {selectedIssue
+                      ? "Update the details of your issue."
+                      : "Add a new issue to your workspace."}
+                  </p>
 
                   <button
                     type="button"
@@ -436,6 +439,12 @@ export default function DashboardPage() {
                   </button>
                 </div>
 
+                {error && (
+                  <div className="rounded-lg border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-400">
+                    {error}
+                  </div>
+                )}
+
                 <form onSubmit={HandleSubmitIssue} className="mt-6 space-y-4">
                   <div>
                     <label className="mb-2 block text-sm text-zinc-300">
@@ -446,7 +455,7 @@ export default function DashboardPage() {
                       required
                       defaultValue={selectedIssue?.title ?? ""}
                       placeholder="What needs to be done?"
-                      className="w-full rounded-lg border border-white/10 bg-zinc-800 px-3 py-2 text-white outline-none focus:border-purple-500"
+                      className="w-full rounded-lg border border-white/10 bg-zinc-800/80 px-4 py-3 text-sm text-white outline-none transition placeholder:text-zinc-500 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20"
                     />
                   </div>
 
@@ -509,7 +518,7 @@ export default function DashboardPage() {
                     <button
                       type="submit"
                       disabled={creating}
-                      className="rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white hover:bg-purple-500 disabled:opacity-50"
+                      className="rounded-lg bg-purple-600 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-purple-500 disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       {creating
                         ? "Saving..."
