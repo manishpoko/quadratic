@@ -205,10 +205,10 @@ export default function DashboardPage() {
 
   function getPriorityStyle(priority: Issue["priority"]) {
     const styles = {
-      light: "text-zinc-400",
-      moderate: "text-blue-400",
-      urgent: "text-orange-400",
-      "high-priority": "text-red-400",
+      light: "bg-zinc-400",
+      moderate: "bg-blue-400",
+      urgent: "bg-orange-400",
+      "high-priority": "bg-red-500",
     };
 
     return styles[priority];
@@ -389,9 +389,10 @@ export default function DashboardPage() {
                       {issue.status}
                     </span>
 
-                    <span
-                      className={`text-xs font-medium ${getPriorityStyle(issue.priority)}`}
-                    >
+                    <span className="flex items-center gap-2 text-xs font-medium text-zinc-300">
+                      <span
+                        className={`h-2 w-2 rounded-full ${getPriorityStyle(issue.priority)}`}
+                      />
                       {issue.priority}
                     </span>
                   </div>
