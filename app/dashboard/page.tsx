@@ -41,41 +41,38 @@ export default function DashboardPage() {
     return matchesStatus && matchesPriority; //if both filters applied -> AND logic, otherwise only the applied filter works.
   });
 
-  const sortedIssues = [
-    ...filteredIssues.sort((a, b) => {
-      //sort by creation date -
+  const sortedIssues = [...filteredIssues].sort((a, b) => {
+    //sort by creation date -
 
-      if (sortBy === "newest") {
-        return (
-          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-        );
-      }
+    if (sortBy === "newest") {
+      return (
+        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      );
+    }
 
-      if (sortBy === "oldest") {
-        return (
-          new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
-        );
-      }
+    if (sortBy === "oldest") {
+      return (
+        new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+      );
+    }
 
-      // Define priority ranking
-      const priorityOrder = {
-        light: 1,
-        moderate: 2,
-        urgent: 3,
-        "high-priority": 4,
-      };
-      if (sortBy === "highest") {
-        return priorityOrder[b.priority] - priorityOrder[a.priority];
-      }
+    // Define priority ranking
+    const priorityOrder = {
+      light: 1,
+      moderate: 2,
+      urgent: 3,
+      "high-priority": 4,
+    };
+    if (sortBy === "highest") {
+      return priorityOrder[b.priority] - priorityOrder[a.priority];
+    }
 
-      if (sortBy === "lowest") {
-        return priorityOrder[a.priority] - priorityOrder[b.priority];
-      }
+    if (sortBy === "lowest") {
+      return priorityOrder[a.priority] - priorityOrder[b.priority];
+    }
 
-      return 0;
-    }),
-  ];
-
+    return 0;
+  });
   useEffect(() => {
     async function fetchIssues() {
       try {
@@ -178,7 +175,7 @@ export default function DashboardPage() {
       });
 
       if (!response.ok) {
-        return Response.json("deleted issue successfully");
+        throw new Error("unable to delete issue");
       }
 
       setIssues((previousIssues) =>
@@ -216,17 +213,17 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-zinc-950 text-white">
-      <div className="mx-auto max-w-6xl px-6 py-10">
+      <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-10">
+        {" "}
         {/* Dashboard header */}
         <section className="flex items-center justify-between border-b border-white/10 pb-6">
           <h1 className="text-2xl font-bold tracking-tight">Quadratic</h1>
 
           <p className="text-sm text-zinc-400">Dashboard</p>
         </section>
-
         <main className="mt-10">
           {/* Page heading */}
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h2 className="text-3xl font-bold">My issues</h2>
 
@@ -245,7 +242,7 @@ export default function DashboardPage() {
                   key={status}
                   type="button"
                   onClick={() => setStatusFilter(status)}
-                  className={`rounded-lg px-4 py-2 text-sm capitalize
+                  className={`w-full rounded-lg px-4 py-2 text-sm capitalize sm:w-auto
                   ${
                     statusFilter === status
                       ? "bg-purple-800 text-white"
@@ -266,7 +263,7 @@ export default function DashboardPage() {
                   key={priority}
                   type="button"
                   onClick={() => setPriorityFilter(priority)}
-                  className={`rounded-lg px-4 py-2 text-sm capitalize
+                  className={`w-full rounded-lg px-4 py-2 text-sm capitalize sm:w-auto
                   ${
                     priorityFilter === priority
                       ? "bg-purple-800 text-white"
@@ -346,9 +343,14 @@ export default function DashboardPage() {
             <p className="mt-5 text-red-400">{error}</p>
           ) : filteredIssues.length === 0 ? (
             <div className="mt-5 flex flex-col items-center justify-center rounded-xl border border-white/10 bg-white/[0.03] px-6 py-16 text-center">
-              <h3 className="text-lg font-medium">No issues yet</h3>
+              <h3 className="text-lg font-medium">
+                {issues.length === 0 ? "No issues yet" : "No matching issues"}
+              </h3>
+
               <p className="mt-2 text-sm text-zinc-400">
-                Create your first issue to get started.
+                {issues.length === 0
+                  ? "Create your first issue to get started."
+                  : "Try changing your filters to see more issues."}
               </p>
             </div>
           ) : (
@@ -418,14 +420,19 @@ export default function DashboardPage() {
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
               <div className="w-full max-w-lg rounded-2xl border border-white/10 bg-zinc-900 p-7 shadow-2xl">
                 <div className="flex items-center justify-between">
-                  <h2 className="text-xl font-semibold tracking-tight">
-                    {selectedIssue ? "Edit issue" : "Create a new issue"}
-                  </h2>
-                  <p className="mt-1 text-sm text-zinc-400">
-                    {selectedIssue
-                      ? "Update the details of your issue."
-                      : "Add a new issue to your workspace."}
-                  </p>
+                  <div>
+                    <h2 className="text-xl font-semibold tracking-tight">
+                      {selectedIssue ? "Edit issue" : "Create a new issue"}
+                    </h2>
+
+                    <p className="mt-1 text-sm text-zinc-400">
+                      {selectedIssue
+                        ? "Update the details of your issue."
+                        : "Add a new issue to your workspace."}
+                    </p>
+                  </div>
+
+                  {/* close button */}
 
                   <button
                     type="button"
@@ -468,7 +475,7 @@ export default function DashboardPage() {
                       rows={3}
                       defaultValue={selectedIssue?.description ?? ""}
                       placeholder="Add some details..."
-                      className="w-full rounded-lg border border-white/10 bg-zinc-800 px-3 py-2 text-white outline-none focus:border-purple-500"
+                      className="w-full rounded-lg border border-white/10 bg-zinc-800/80 px-4 py-3 text-sm text-white outline-none transition placeholder:text-zinc-500 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20"
                     />
                   </div>
 
@@ -479,7 +486,7 @@ export default function DashboardPage() {
                     <select
                       name="status"
                       defaultValue={selectedIssue?.status ?? "pending"}
-                      className="w-full rounded-lg border border-white/10 bg-zinc-800 px-3 py-2 text-white"
+                      className="w-full rounded-lg border border-white/10 bg-zinc-800/80 px-4 py-3 text-sm text-white outline-none transition placeholder:text-zinc-500 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20"
                     >
                       <option value="pending">Pending</option>
                       <option value="in process">In progress</option>
@@ -495,7 +502,7 @@ export default function DashboardPage() {
                     <select
                       name="priority"
                       defaultValue={selectedIssue?.priority ?? "moderate"}
-                      className="w-full rounded-lg border border-white/10 bg-zinc-800 px-3 py-2 text-white"
+                      className="w-full rounded-lg border border-white/10 bg-zinc-800/80 px-4 py-3 text-sm text-white outline-none transition placeholder:text-zinc-500 focus:border-purple-500 focus:ring-2 focus:ring-purple-500/20"
                     >
                       <option value="light">Low</option>
                       <option value="moderate">Medium</option>
