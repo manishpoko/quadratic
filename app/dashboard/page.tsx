@@ -191,6 +191,29 @@ export default function DashboardPage() {
     }
   }
 
+  //helper functions for status and priority styling
+  function getStatusStyle(status: Issue["status"]) {
+    const styles = {
+      pending: "bg-zinc-500/10 text-zinc-400 border-zinc-500/20",
+      "in process": "bg-blue-500/10 text-blue-400 border-blue-500/20",
+      delayed: "bg-red-500/10 text-red-400 border-red-500/20",
+      completed: "bg-green-500/10 text-green-400 border-green-500/20",
+    };
+
+    return styles[status];
+  }
+
+  function getPriorityStyle(priority: Issue["priority"]) {
+    const styles = {
+      light: "text-zinc-400",
+      moderate: "text-blue-400",
+      urgent: "text-orange-400",
+      "high-priority": "text-red-400",
+    };
+
+    return styles[priority];
+  }
+
   return (
     <div className="min-h-screen bg-zinc-950 text-white">
       <div className="mx-auto max-w-6xl px-6 py-10">
@@ -321,43 +344,57 @@ export default function DashboardPage() {
               {sortedIssues.map((issue) => (
                 <div
                   key={issue.id}
-                  className="rounded-xl border border-white/10 bg-white/[0.03] p-5"
+                  className="rounded-xl border border-white/10 bg-white/[0.03] p-5 transition hover:border-purple-500/30 hover:bg-white/[0.05]"
                 >
-                  <div className="flex items-center justify-between">
-                    <h3 className="font-semibold">{issue.title}</h3>
+                  {/* Card header */}
+                  <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="min-w-0">
+                      <h3 className="font-semibold text-white">
+                        {issue.title}
+                      </h3>
 
-                    <span className="rounded-full border border-purple-500/30 bg-purple-500/10 px-3 py-1 text-xs text-purple-300 ">
+                      <p className="mt-2 text-sm text-zinc-400">
+                        {issue.description || "No description provided"}
+                      </p>
+                    </div>
+
+                    {/* Actions */}
+                    <div className="flex shrink-0 items-center gap-3">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSelectedIssue(issue);
+                          setIsModalOpen(true);
+                        }}
+                        className="text-sm text-purple-400 hover:text-purple-300"
+                      >
+                        Edit
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => HandleDeleteIssue(issue.id)}
+                        className="text-sm text-red-400 hover:text-red-300"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Status and priority */}
+                  <div className="mt-4 flex flex-wrap items-center gap-3">
+                    <span
+                      className={`rounded-full border px-3 py-1 text-xs font-medium ${getStatusStyle(issue.status)}`}
+                    >
                       {issue.status}
                     </span>
 
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setSelectedIssue(issue);
-                        setIsModalOpen(true);
-                      }}
-                      className="text-sm text-purple-400 hover:text-purple-300"
+                    <span
+                      className={`text-xs font-medium ${getPriorityStyle(issue.priority)}`}
                     >
-                      Edit Issue
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => HandleDeleteIssue(issue.id)}
-                      className="text-sm text-red-400 hover:text-red-300"
-                    >
-                      Delete
-                    </button>
+                      {issue.priority}
+                    </span>
                   </div>
-
-                  <p className="mt-2 text-sm text-zinc-400">
-                    {issue.description || "No description provided"}
-                  </p>
-
-                  <p className="mt-3 text-xs text-zinc-400">
-                    Priority:
-                    <span className="text-white">{issue.priority}</span>
-                  </p>
                 </div>
               ))}
             </div>
