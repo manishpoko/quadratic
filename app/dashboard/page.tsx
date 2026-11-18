@@ -336,7 +336,7 @@ export default function DashboardPage() {
             className="rounded-lg bg-purple-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-purple-500"
           >
             + New issue
-          </button>
+          </button>issues
           {loading ? (
             <p className="mt-5 text-zinc-400">Loading issues...</p>
           ) : error ? (
